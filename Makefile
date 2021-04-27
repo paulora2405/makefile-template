@@ -15,10 +15,12 @@ OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 DEPENDENCIES  \
          := $(OBJECTS:.o=.d)
 
-ARCHIVE  := archive               # name of the archive file
-SUBMISSIONS := 									\ # files and directories to archive
-	src/ include/         				\ # each line must be separeted by a backslash
-	LICENSE README.md Makefile 		\
+# name of the archive file
+ARCHIVE  := archive
+# files and directories to archive
+SUBMISSIONS := 	        \
+	src/ include/  	      \ # each line must be separeted by a backslash
+	LICENSE README.md Makefile \
 
 
 all: build $(APP_DIR)/$(TARGET)
@@ -34,7 +36,9 @@ $(APP_DIR)/$(TARGET): $(OBJECTS)
 
 -include $(DEPENDENCIES)
 
-.PHONY: all build clean debug release info
+# any non-file target needs to be in .phony so there is no errors
+# with files having the same name as a target's name
+.PHONY: all build clean debug release archive info
 
 build:
 	@mkdir -p $(APP_DIR)
