@@ -1,30 +1,33 @@
-CXX      := -g++
-CXXFLAGS := -std=c++14 -pedantic-errors -Wall -Wextra #-Werror
-LDFLAGS  := -lstdc++ -lm # -L/usr/lib
+CXX      := g++# -g++ to compile everything even with errors
+CXXFLAGS := -std=c++14 -pedantic-errors -Wall -Wextra -fmessage-length=0# -Werror
+LDFLAGS  := -lstdc++ -lm -lGL -lGLU -lGLEW -lglfw# -L/usr/lib
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
-TARGET   := main # name of the executable target
-INCLUDE  := -Iinclude/
-SRC      :=                     \
-	$(wildcard src/module1/*.cpp) \
-	$(wildcard src/module2/*.cpp) \
-	$(wildcard src/*.cpp)         \
+TARGET   := main.out
+INCLUDE  := -Iinclude/ -Iinclude/vendor/imgui/
+SRC      :=                      \
+	$(wildcard src/graphics/*.cpp) \
+	$(wildcard src/inputs/*.cpp) \
+	$(wildcard src/logging/*.cpp)  \
+	$(wildcard src/tests/*.cpp)  \
+	$(wildcard src/vendor/*/*.cpp) \
+	$(wildcard src/*.cpp)          \
 
 OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 DEPENDENCIES  \
          := $(OBJECTS:.o=.d)
 
-# name of the archive file
-ARCHIVE  := archive
-# files and directories to archive
-SUBMISSIONS := 	        \
-	src/ include/  	      \ # each line must be separeted by a backslash
-	LICENSE README.md Makefile \
-
+ARCHIVE  := doom-slayer-project
+SUBMISSIONS := 									\
+	src/ include/	res/						\
+	configuration/ .vscode/ logs/ \
+	.clang-format 								\
+	LICENSE README.md Makefile 		\
 
 all: build $(APP_DIR)/$(TARGET)
-	@ln -s $(APP_DIR)/$(TARGET) $(TARGET)
+	-@rm -rf $(TARGET)
+	-@ln -s $(APP_DIR)/$(TARGET) $(TARGET)
 
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
@@ -36,18 +39,19 @@ $(APP_DIR)/$(TARGET): $(OBJECTS)
 
 -include $(DEPENDENCIES)
 
-# any non-file target needs to be in .phony so there is no errors
-# with files having the same name as a target's name
-.PHONY: all build clean debug release archive info
+.PHONY: all run build clean debug release archive info
+
+run: all
+	$(APP_DIR)/$(TARGET)
 
 build:
 	@mkdir -p $(APP_DIR)
 	@mkdir -p $(OBJ_DIR)
 
-debug: CXXFLAGS += -g
+debug: CXXFLAGS +=-DDEBUG -g
 debug: all
 
-release: CXXFLAGS += -O2
+release: CXXFLAGS +=-O2
 release: all
 
 clean:
